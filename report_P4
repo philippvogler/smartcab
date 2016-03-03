@@ -1,0 +1,25 @@
+> Philipp Vogler
+> MLE Nanodegree
+
+# P4: Train a Smartcab to Drive
+
+## 1. Implement a basic driving agent
+
+** In your report, mention what you see in the agent’s behavior. Does it eventually make it to the target location? **
+
+## 2.  Identify and update state
+
+** Justify why you picked these set of states, and how they model the agent and its environment.**
+
+## 3. Implement Q-Learning
+
+ ** What changes do you notice in the agent’s behavior? **
+
+## 4. Enhance the driving agent
+
+** Report what changes you made to your basic implementation of Q-Learning to achieve the final version of the agent. How well does it perform? **
+
+
+
+
+** Does your agent get close to finding an optimal policy, i.e. reach the destination in the minimum possible time, and not incur any penalties? **
