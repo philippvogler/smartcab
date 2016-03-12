@@ -14,11 +14,16 @@ class LearningAgent(Agent):
         
         # Variable to recording the current position
         # Variable that records the deadline
-        # Load Q-Tablle
-        # Dictionary sems to be a good choice for the Q-Tablle: a keys use the tuple of position, light, and oncoming traffice: as valeues the action, reward tuple. Heading left and right do not make muche sens to the here as they should not be significant to the decision        
+       
+       # Load Q-Tablle
+        # Dictionary sems to be a good choice for the Q-Tablle: a keys use the tuple of position, light, oncoming traffice, and  action: as valeues the q value for the key.
+        # the initial starting q-values/Dictionaty values should be random 
+        # Heading, left and right do not make muche sens to the here as they should not be significant to the decision        
         
-        # STEP2: Varible that stears the chance for random action picing
+        # STEP2: Varible for exploration alpha that leads to random action picking
+        
         # STEP4: Init Learningrate gamma
+        # gamma = 0.2 # learning rate
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
@@ -36,16 +41,21 @@ class LearningAgent(Agent):
 
         # TODO: Update state
 
-        # update the current position
-        # update situation: lights, on coming traffice, heading 
+        # How to make use of the planners recomendation ???
+
+        # update the current position, lights, on coming traffice
+        # tupels seame to be the natural choice here
+
         # update deadline 
-        # tupels seme to be the natural choice here
+
+        # STEP2: Create a decreasing alpha for exploration
+        # alpha = 1- 1/deadline
 
         # TODO: Select action according to your policy
         action = random.choice([None, 'forward', 'left', 'right'])
         
         # filter the Q tablle for current position
-        # pic the action/Q-value pair with the highest Q-value
+        # pick the action/Q-value pair with the highest Q-value
         
         # STEP2: add a if statement that pics a random action from the Q-tablle with alpha percent chance
         # STEP3: tune the action picking depending on the deadline 
