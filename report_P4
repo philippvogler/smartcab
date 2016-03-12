@@ -7,6 +7,8 @@
 
 ** In your report, mention what you see in the agent’s behavior. Does it eventually make it to the target location? **
 
+The line action = random.choice([None, 'forward', 'left', 'right'])` makes the driver choose a random action. It makes its way through the world and to the location by chance. Usually it takes quite a lot of time until the location is reached.
+
 ## 2.  Identify and update state
 
 ** Justify why you picked these set of states, and how they model the agent and its environment.**
