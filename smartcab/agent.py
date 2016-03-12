@@ -14,14 +14,18 @@ class LearningAgent(Agent):
         
         # Variable to recording the current position
         # Variable that records the deadline
+        # Load Q-Tablle
+        # Dictionary sems to be a good choice for the Q-Tablle: a keys use the tuple of position, light, and oncoming traffice: as valeues the action, reward tuple. Heading left and right do not make muche sens to the here as they should not be significant to the decision        
+        
         # STEP2: Varible that stears the chance for random action picing
+        # STEP4: Init Learningrate gamma
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
         # TODO: Prepare for a new trip; reset any variables here, if required
         
-        # Load the Q-Tablle
-        # set current position and deadline to defulte
+        # reload the Q-Tablle
+        # set current position and deadline to default
         
     
     def update(self, t):
@@ -33,8 +37,9 @@ class LearningAgent(Agent):
         # TODO: Update state
 
         # update the current position
-        # update situation: traffic lights, on coming traffice, heading
+        # update situation: lights, on coming traffice, heading 
         # update deadline 
+        # tupels seme to be the natural choice here
 
         # TODO: Select action according to your policy
         action = random.choice([None, 'forward', 'left', 'right'])
@@ -50,7 +55,9 @@ class LearningAgent(Agent):
 
         # TODO: Learn policy based on state, action, reward
 
-        # update the Q-tablle according to the reward and the current position variable 
+        # update the Q-tablle according to the reward and the current position variable
+
+        # STEP4: Include a learningrate gamma
 
         print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
 
