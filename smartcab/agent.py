@@ -12,15 +12,30 @@ class LearningAgent(Agent):
         self.planner = RoutePlanner(self.env, self)  # simple route planner to get next_waypoint
         # TODO: Initialize any additional variables here
         
-        # Variable to recording the current position
         # Variable that records the deadline
+        deadline = None
+        
+        # recording recomendation and actual action for updating the q-table properly
+        recomendation_nwp = None
+        actual_action = None
+        start_state = None
        
-       # Load Q-Tablle
-        # Dictionary sems to be a good choice for the Q-Tablle: a keys use the tuple of position, light, oncoming traffice, and  action: as valeues the q value for the key.
-        # the initial starting q-values/Dictionaty values should be random 
-        # Heading, left and right do not make muche sens to the here as they should not be significant to the decision        
+        # Load Q-Tablle: (state), (location), (heading), next_waypoint  {'light': light, 'oncoming': oncoming, 'left': left, 'right': right}
+        # Dictionary sems to be a good choice for the Q-Tablle: a keys use the tuple of recomendation, light, oncoming*, and actual action: as values the q value for the key.
+        # the initial starting q-values/Dictionaty values should be random -1 to +1
+        # Heading, left and right do not make muche sens to the here as they should not be significant to the decision
+        Q_table = {} # empty dictionary
+        
+        # creating the key tupels for the Q table
+        states_for_actions = [None, 'forward', 'left', 'right']
+        states_for_light = ['green', 'red']
+        
+        # 2 light * 4 oncoming * 4 left * 4 right * 4 next_waypoint * 4 actual_action = 2 ** 7 = 128
+        # How to populate a dictionary efficiently
+        
         
         # STEP2: Varible for exploration alpha that leads to random action picking
+        # alpha = 1
         
         # STEP4: Init Learningrate gamma
         # gamma = 0.2 # learning rate
@@ -41,15 +56,16 @@ class LearningAgent(Agent):
 
         # TODO: Update state
 
-        # How to make use of the planners recomendation ???
+        # How to make use of the planners recomendation ??? By putting them into the state instead of the position!
 
-        # update the current position, lights, on coming traffice
+        # update the recomendation, lights, on coming traffice
         # tupels seame to be the natural choice here
 
         # update deadline 
 
         # STEP2: Create a decreasing alpha for exploration
-        # alpha = 1- 1/deadline
+        # if deadline != None
+        #   alpha = 1- 1/deadline
 
         # TODO: Select action according to your policy
         action = random.choice([None, 'forward', 'left', 'right'])
