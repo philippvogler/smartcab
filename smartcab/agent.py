@@ -1,4 +1,5 @@
 import random
+import itertools
 from environment import Agent, Environment
 from planner import RoutePlanner
 from simulator import Simulator
@@ -30,9 +31,17 @@ class LearningAgent(Agent):
         states_for_actions = [None, 'forward', 'left', 'right']
         states_for_light = ['green', 'red']
         
-        # 2 light * 4 oncoming * 4 left * 4 right * 4 next_waypoint * 4 actual_action = 2 ** 7 = 128
-        # How to populate a dictionary efficiently
+        # 2 light * 4 oncoming * 4 left * 4 right * 4 next_waypoint * 4 actual_action = 2 ** 7 = 128 states
+        # How to populate a dictionary efficiently?? izip, zip or combinatoric generators
         
+        # so geht es nicht. Die itertools sind nicht dafür gemacht.
+        action_tupels = itertools.product(states_for_actions, repeat=5)
+        print (action_tupels)
+        type(action_tupels)
+        light_tupels = itertools.cycle(states_for_light, (len(action_tupels)/2))
+        Q_keys = zi p(light_tupels, action_tupels)
+        
+        print Q_keys
         
         # STEP2: Varible for exploration alpha that leads to random action picking
         # alpha = 1
