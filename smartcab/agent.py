@@ -17,31 +17,39 @@ class LearningAgent(Agent):
         deadline = None
         
         # recording recomendation and actual action for updating the q-table properly
-        recomendation_nwp = None
-        actual_action = None
-        start_state = None
+        # recomendation_nwp = None
+        # action = None
        
-        # Load Q-Tablle: (state), (location), (heading), next_waypoint  {'light': light, 'oncoming': oncoming, 'left': left, 'right': right}
-        # Dictionary sems to be a good choice for the Q-Tablle: a keys use the tuple of recomendation, light, oncoming*, and actual action: as values the q value for the key.
-        # the initial starting q-values/Dictionaty values should be random -1 to +1
-        # Heading, left and right do not make muche sens to the here as they should not be significant to the decision
+        # Load Q-Tablle:  {'light': light, 'oncoming': oncoming, 'left': left, 'right': right}
+        # Dictionary sems to be a good choice for the Q-table: a keys use the tuple of recomendatio_nwp, light, oncoming, left, right and actual action:  for the key.
+        
         Q_table = {} # empty dictionary
         
-        # creating the key tupels for the Q table
+        # creating the key tupels for the Q-table
         states_for_actions = [None, 'forward', 'left', 'right']
         states_for_light = ['green', 'red']
         
-        # 2 light * 4 oncoming * 4 left * 4 right * 4 next_waypoint * 4 actual_action = 2 ** 7 = 128 states
-        # How to populate a dictionary efficiently?? izip, zip or combinatoric generators
+        # Q-table keys: 4 recomendation_nwp * 2 light * 4 oncoming * 4 left * 4 right * 4 action = 2 ** 7 = 128 states
+        Q_keys = []
         
-        # so geht es nicht. Die itertools sind nicht dafür gemacht.
-        action_tupels = itertools.product(states_for_actions, repeat=5)
-        print (action_tupels)
-        type(action_tupels)
-        light_tupels = itertools.cycle(states_for_light, (len(action_tupels)/2))
-        Q_keys = zi p(light_tupels, action_tupels)
+        for action in states_for_actions:
+            for right in states_for_actions:
+                    for left in states_for_actions:
+                            for oncoming in states_for_actions:
+                                for light in states_for_light:
+                                    for recomendation_nwp in states_for_actions:
+                                        Q_keys.append((recomendation_nwp,light,oncoming,left,right,action)
+ 
+        # Q-table initial values    
         
-        print Q_keys
+        Q_initial_values = [random.random() for _ in range(0, len(Q_key))]
+        #http://stackoverflow.com/questions/6863309/how-to-create-a-range-of-random-decimal-numbers-between-0-and-1
+        #http://stackoverflow.com/questions/1712227/how-to-get-the-size-of-a-list
+        
+        # Assambling the Q-table dictionary
+        
+        Q_table = dict(zip(Q_keys,Q_initial_values))
+        #http://stackoverflow.com/questions/209840/map-two-lists-into-a-dictionary-in-python
         
         # STEP2: Varible for exploration alpha that leads to random action picking
         # alpha = 1
@@ -53,8 +61,10 @@ class LearningAgent(Agent):
         self.planner.route_to(destination)
         # TODO: Prepare for a new trip; reset any variables here, if required
         
-        # reload the Q-Tablle
-        # set current position and deadline to default
+        # set deadline to default
+        deadline = None
+        recomendation_nwp = None
+        action = None
         
     
     def update(self, t):
@@ -77,7 +87,7 @@ class LearningAgent(Agent):
         #   alpha = 1- 1/deadline
 
         # TODO: Select action according to your policy
-        action = random.choice([None, 'forward', 'left', 'right'])
+        action = self.next_waypoint    # random.choice([None, 'forward', 'left', 'right'])
         
         # filter the Q tablle for current position
         # pick the action/Q-value pair with the highest Q-value
