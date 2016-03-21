@@ -17,7 +17,8 @@ class LearningAgent(Agent):
         deadline = None
         
         # recording recomendation and actual action for updating the q-table properly
-        # recomendation_nwp = None
+        recomendation_nwp = None
+        state = None
         # action = None
        
         # Load Q-Tablle:  {'light': light, 'oncoming': oncoming, 'left': left, 'right': right}
@@ -42,9 +43,10 @@ class LearningAgent(Agent):
  
         # Q-table initial values    
         
-        Q_initial_values = [random.random() for _ in range(0, len(Q_key))]
+        Q_initial_values = [random.random()*10 for _ in range(0, len(Q_key))]
         #http://stackoverflow.com/questions/6863309/how-to-create-a-range-of-random-decimal-numbers-between-0-and-1
         #http://stackoverflow.com/questions/1712227/how-to-get-the-size-of-a-list
+        # can I incentivese exploration in the beginning by setting very hight inital values?
         
         # Assambling the Q-table dictionary
         
@@ -61,9 +63,9 @@ class LearningAgent(Agent):
         self.planner.route_to(destination)
         # TODO: Prepare for a new trip; reset any variables here, if required
         
-        # set deadline to default
         deadline = None
         recomendation_nwp = None
+        state = None
         action = None
         
     
@@ -75,18 +77,27 @@ class LearningAgent(Agent):
 
         # TODO: Update state
 
-        # How to make use of the planners recomendation ??? By putting them into the state instead of the position!
+        state = (self.next_waypoint, inputs)
+        # (recomendation_nwp,light,oncoming,left,right)
 
-        # update the recomendation, lights, on coming traffice
-        # tupels seame to be the natural choice here
-
-        # update deadline 
-
-        # STEP2: Create a decreasing alpha for exploration
+        # ADDITIONAL: Create a decreasing alpha for exploration
         # if deadline != None
         #   alpha = 1- 1/deadline
 
         # TODO: Select action according to your policy
+
+        # retrieing the Q-values for the possible actions
+        decision_table = { 'None': Q_table[(state + 'None')],
+        'right': Q_table[(state + 'right')],
+        'left': Q_table[(state + 'left')],
+        'forward': Q_table[(state + 'forward')]}        
+   
+        maxval, action = max((v, k) for k, v in decision_table.iteritems())
+        
+        
+        # http://stackoverflow.com/questions/9693816/searching-dictionary-for-max-value-then-grabbing-associated-key
+        
+        
         action = self.next_waypoint    # random.choice([None, 'forward', 'left', 'right'])
         
         # filter the Q tablle for current position
