@@ -1,12 +1,16 @@
 import random
-import itertools
 from environment import Agent, Environment
 from planner import RoutePlanner
 from simulator import Simulator
 
 class LearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
-
+        
+    Q_table = {} # empty dictionary
+  
+    #----
+    
+    #---      
     def __init__(self, env):
         super(LearningAgent, self).__init__(env)  # sets self.env = env, state = None, next_waypoint = None, and a default color
         self.color = 'red'  # override color
@@ -14,18 +18,14 @@ class LearningAgent(Agent):
         # TODO: Initialize any additional variables here
         
         # Variable that records the deadline
-        deadline = None
+        #deadline = None
         
         # recording recomendation and actual action for updating the q-table properly
-        recomendation_nwp = None
-        state = None
-        # action = None
-       
-        # Load Q-Tablle:  {'light': light, 'oncoming': oncoming, 'left': left, 'right': right}
-        # Dictionary sems to be a good choice for the Q-table: a keys use the tuple of recomendatio_nwp, light, oncoming, left, right and actual action:  for the key.
-        
-        Q_table = {} # empty dictionary
-        
+        #recomendation_nwp = None
+        #state = None
+        #action = None
+        #decision_table = {} 
+        #----
         # creating the key tupels for the Q-table
         states_for_actions = [None, 'forward', 'left', 'right']
         states_for_light = ['green', 'red']
@@ -35,49 +35,59 @@ class LearningAgent(Agent):
         
         for action in states_for_actions:
             for right in states_for_actions:
-                    for left in states_for_actions:
-                            for oncoming in states_for_actions:
-                                for light in states_for_light:
-                                    for recomendation_nwp in states_for_actions:
-                                        Q_keys.append((recomendation_nwp,light,oncoming,left,right,action)
+                for left in states_for_actions:
+                    for oncoming in states_for_actions:
+                        for light in states_for_light:
+                            for recomendation_nwp in states_for_actions:
+                                Q_keys.append((recomendation_nwp,light,oncoming,left,right,action))
  
         # Q-table initial values    
-        
-        Q_initial_values = [random.random()*10 for _ in range(0, len(Q_key))]
-        #http://stackoverflow.com/questions/6863309/how-to-create-a-range-of-random-decimal-numbers-between-0-and-1
-        #http://stackoverflow.com/questions/1712227/how-to-get-the-size-of-a-list
+        Q_initial_values = [random.random()*10 for _ in range(0, len(Q_keys))] #random.sample(xrange(10), 128) # random.random()*10 for _ in range(0, len([Q_keys]))     
+
+        # http://stackoverflow.com/questions/16655089/python-random-numbers-into-a-list
+        # http://stackoverflow.com/questions/6863309/how-to-create-a-range-of-random-decimal-numbers-between-0-and-1
+        # http://stackoverflow.com/questions/1712227/how-to-get-the-size-of-a-list
         # can I incentivese exploration in the beginning by setting very hight inital values?
         
         # Assambling the Q-table dictionary
-        
+        global Q_table
         Q_table = dict(zip(Q_keys,Q_initial_values))
+        print(Q_table)
         #http://stackoverflow.com/questions/209840/map-two-lists-into-a-dictionary-in-python
-        
+        #-----
         # STEP2: Varible for exploration alpha that leads to random action picking
         # alpha = 1
         
         # STEP4: Init Learningrate gamma
         # gamma = 0.2 # learning rate
 
+
     def reset(self, destination=None):
         self.planner.route_to(destination)
         # TODO: Prepare for a new trip; reset any variables here, if required
         
-        deadline = None
-        recomendation_nwp = None
-        state = None
-        action = None
-        
+        #deadline = None
+        #recomendation_nwp = None
+        #state = None
+        #action = None
+        #decision_table = {}
     
-    def update(self, t):
+    def update(self, Q_table):
         # Gather inputs
         self.next_waypoint = self.planner.next_waypoint()  # from route planner, also displayed by simulator
         inputs = self.env.sense(self)
         deadline = self.env.get_deadline(self)
 
+        #print type(self.next_waypoint) #forward
+        #print (inputs) # {'light': 'green', 'oncoming': None, 'right': None, 'left': None}: dict
+        #print (deadline) #25. int
+
         # TODO: Update state
 
-        state = (self.next_waypoint, inputs)
+        state = ((self.next_waypoint,) + tuple(inputs.values()))
+        # http://stackoverflow.com/questions/16449184/python-converting-string-to-tuple-without-splitting-characters        
+        # http://stackoverflow.com/questions/7002429/how-can-i-extract-all-values-from-a-dictionary-in-python
+        # http://stackoverflow.com/questions/12836128/python-convert-list-to-tuple        
         # (recomendation_nwp,light,oncoming,left,right)
 
         # ADDITIONAL: Create a decreasing alpha for exploration
@@ -85,35 +95,41 @@ class LearningAgent(Agent):
         #   alpha = 1- 1/deadline
 
         # TODO: Select action according to your policy
+        # print(state)
+        #print ((state + ('None',)))
 
-        # retrieing the Q-values for the possible actions
-        decision_table = { 'None': Q_table[(state + 'None')],
-        'right': Q_table[(state + 'right')],
-        'left': Q_table[(state + 'left')],
-        'forward': Q_table[(state + 'forward')]}        
-   
+        # fetching the Q-values for the possible actions
+        #print(Q_table[state + ('None',)]) 
+        print (Q_table)
+        #a = Q_table[('left', 'red', None, None, None, None)]       
+        #print(a)        
+        #a = Q_table[state + ('None',)]
+        
+        #decision_table = {'None': a, 'right': Q_table[(state + 'right')], 'left': Q_table[(state + 'left')], 'forward': Q_table[(state + 'forward')]}        
+
+
+        # pick the action/Q-value pair with the highest Q-value
         maxval, action = max((v, k) for k, v in decision_table.iteritems())
-        
-        
+                
         # http://stackoverflow.com/questions/9693816/searching-dictionary-for-max-value-then-grabbing-associated-key
         
+        # action = self.next_waypoint    # random.choice([None, 'forward', 'left', 'right'])
         
-        action = self.next_waypoint    # random.choice([None, 'forward', 'left', 'right'])
-        
-        # filter the Q tablle for current position
-        # pick the action/Q-value pair with the highest Q-value
-        
-        # STEP2: add a if statement that pics a random action from the Q-tablle with alpha percent chance
-        # STEP3: tune the action picking depending on the deadline 
+        # ADDITION: add a if statement that pics a random action from the Q-tablle with alpha percent chance
+        # ADDITION: tune the action picking depending on the deadline: exploration/exploitation
 
         # Execute action and get reward
         reward = self.env.act(self, action)
 
         # TODO: Learn policy based on state, action, reward
 
-        # update the Q-tablle according to the reward and the current position variable
+        # update the Q-tablle according to the reward and the stats maxval
 
-        # STEP4: Include a learningrate gamma
+        Q_table[(state + action)] = (maxval + reward)
+        
+        #http://www.tutorialspoint.com/python/python_dictionary.htm
+
+        # ADDITIONAL: Include a learningrate gamma
 
         print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
 
