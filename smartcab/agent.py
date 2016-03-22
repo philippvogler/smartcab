@@ -30,7 +30,6 @@ class LearningAgent(Agent):
         states_for_actions = [None, 'forward', 'left', 'right']
         states_for_light = ['green', 'red']
         
-        # Q-table keys: 4 recomendation_nwp * 2 light * 4 oncoming * 4 left * 4 right * 4 action = 2 ** 7 = 128 states
         Q_keys = []
         
         for action in states_for_actions:
@@ -42,8 +41,8 @@ class LearningAgent(Agent):
                                 Q_keys.append((recomendation_nwp,light,oncoming,left,right,action))
  
         # Q-table initial values    
-        Q_initial_values = [random.random()*10 for _ in range(0, len(Q_keys))] #random.sample(xrange(10), 128) # random.random()*10 for _ in range(0, len([Q_keys]))     
-
+        Q_initial_values = [int(random.random()*10) for _ in range(0, len(Q_keys))] 
+        # FRAGE: Oder macht hier doch float mehr Sinn, um zu vermeiden das es zwei genau gleich große Zhalen gibt???
         # http://stackoverflow.com/questions/16655089/python-random-numbers-into-a-list
         # http://stackoverflow.com/questions/6863309/how-to-create-a-range-of-random-decimal-numbers-between-0-and-1
         # http://stackoverflow.com/questions/1712227/how-to-get-the-size-of-a-list
@@ -52,7 +51,6 @@ class LearningAgent(Agent):
         # Assambling the Q-table dictionary
         global Q_table
         Q_table = dict(zip(Q_keys,Q_initial_values))
-        print(Q_table)
         #http://stackoverflow.com/questions/209840/map-two-lists-into-a-dictionary-in-python
         #-----
         # STEP2: Varible for exploration alpha that leads to random action picking
@@ -72,7 +70,6 @@ class LearningAgent(Agent):
         #action = None
         #decision_table = {}
     
-    def update(self, Q_table):
         # Gather inputs
         self.next_waypoint = self.planner.next_waypoint()  # from route planner, also displayed by simulator
         inputs = self.env.sense(self)
@@ -85,27 +82,22 @@ class LearningAgent(Agent):
         # TODO: Update state
 
         state = ((self.next_waypoint,) + tuple(inputs.values()))
+        #         (recomendation_nwp)  + (light,oncoming,left,right)
         # http://stackoverflow.com/questions/16449184/python-converting-string-to-tuple-without-splitting-characters        
         # http://stackoverflow.com/questions/7002429/how-can-i-extract-all-values-from-a-dictionary-in-python
         # http://stackoverflow.com/questions/12836128/python-convert-list-to-tuple        
-        # (recomendation_nwp,light,oncoming,left,right)
 
         # ADDITIONAL: Create a decreasing alpha for exploration
         # if deadline != None
         #   alpha = 1- 1/deadline
 
         # TODO: Select action according to your policy
-        # print(state)
         #print ((state + ('None',)))
+       
 
         # fetching the Q-values for the possible actions
-        #print(Q_table[state + ('None',)]) 
-        print (Q_table)
-        #a = Q_table[('left', 'red', None, None, None, None)]       
-        #print(a)        
         #a = Q_table[state + ('None',)]
         
-        #decision_table = {'None': a, 'right': Q_table[(state + 'right')], 'left': Q_table[(state + 'left')], 'forward': Q_table[(state + 'forward')]}        
 
 
         # pick the action/Q-value pair with the highest Q-value
