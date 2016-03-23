@@ -26,10 +26,17 @@ The line action = random.choice([None, 'forward', 'left', 'right'])` makes the d
 ** Report what changes you made to your basic implementation of Q-Learning to achieve the final version of the agent. How well does it perform? **
 
 * reduce the count of states/keys in the q table
+    In my fist Q table there was the possibility for the recommendation for the next waypoint to be NONE, which is a state that the planner does not provide.
+    Also I realized that with right-of-way rules the left- sensor is quit unimportant for the decision.
 * introduce a learning rate
+    The learning rate really improved the learning of the agent. It help especially against the clockwise cycling.
+
 * introduce a gamma to solve the exploration exploitation dilemma
-* use the deadline for this
+    The exploitation rate helps to cover more states. The way it is implemented with regard to the deadline, helps to minimize the side unwanted side effect of exploration under time pressure.
+
 * set the initial values of the q table in regard of the rewards.
+  rewards for moving arround is up to 2 points. 
+* implementing a performance measure
 
 
 ** Does your agent get close to finding an optimal policy, i.e. reach the destination in the minimum possible time, and not incur any penalties? **
