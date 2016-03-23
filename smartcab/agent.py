@@ -26,9 +26,10 @@ class LearningAgent(Agent):
 
         # creating the key tupels for the Q-table
         states_for_actions = [None, 'forward', 'left', 'right']
+        states_for_recomendation_nwp = ['forward', 'left', 'right']
         states_for_light = ['green', 'red']
         
-        # Q-table keys: 4 recomendation_nwp * 2 light * 4 oncoming * 4 left * 4 right * 4 action = 2048 states
+        # Q-table keys: 3 recomendation_nwp * 2 light * 4 oncoming * 4 left * 4 right * 4 action = 1536 states
         Q_keys = []
         
         for action in states_for_actions:
@@ -36,12 +37,12 @@ class LearningAgent(Agent):
                 for left in states_for_actions:
                     for oncoming in states_for_actions:
                         for light in states_for_light:
-                            for recomendation_nwp in states_for_actions:
+                            for recomendation_nwp in states_for_recomendation_nwp:
                                 Q_keys.append((recomendation_nwp,light,oncoming,left,right,action))
  
         # Q-table initial values    
-        Q_initial_values = [random.random() for _ in range(0, len(Q_keys))] 
-        # Q_initial_values = [int(random.random()*10) for _ in range(0, len(Q_keys))] 
+        # Q_initial_values = [random.random() for _ in range(0, len(Q_keys))] 
+        Q_initial_values = [int(random.random()*5) for _ in range(0, len(Q_keys))] 
         # QUESTION: can I incentivese exploration in the beginning by setting very hight inital values?
         # http://stackoverflow.com/questions/16655089/python-random-numbers-into-a-list
         # http://stackoverflow.com/questions/6863309/how-to-create-a-range-of-random-decimal-numbers-between-0-and-1
@@ -52,8 +53,12 @@ class LearningAgent(Agent):
         global Q_table
         Q_table = dict(zip(Q_keys,Q_initial_values))
         #http://stackoverflow.com/questions/209840/map-two-lists-into-a-dictionary-in-python
+        
+        #Performance mesurement
+        global totalReward        
+        totalReward = 0
 
-    def reset(self, destination=None):
+    def rest(self, destination=None):
         self.planner.route_to(destination)
         # TODO: Prepare for a new trip; reset any variables here, if required
         
@@ -87,7 +92,7 @@ class LearningAgent(Agent):
         decision_table = {None: Q_table[(state + (None,))], 'right': Q_table[(state + ('right',))], 'left': Q_table[(state + ('left',))], 'forward': Q_table[(state + ('forward',))]}        
 
         # Exploitation rate gamma
-        gamma = (1 / (deadline + 1)) + 0.1
+        gamma = (1 / (deadline + 0.00001)) + 0.9
 
         if  random.random() < gamma:
             # pick the action/Q-value pair with the highest Q-value to Exploit the Q table
@@ -116,15 +121,16 @@ class LearningAgent(Agent):
         # TODO: Learn policy based on state, action, reward
            
         # decreasing learning rate alpha
-        alpha = 1/((t/10)+1)
+        alpha = 1/((t/50)+1)
 
         # update the Q-tablle according to the reward and the stats maxQval
         Q_table[(state + (action,))] = (maxQval + (alpha * reward))
         # http://www.tutorialspoint.com/python/python_dictionary.htm
-
-        # ADDITION: add a if statement that pics a random action from the Q-tablle with gamma percent chance
+        
+        global totalReward
+        totalReward = totalReward + reward
        
-        print "Q learning: state = {}, action = {}, maxQval = {}, reward = {} \n".format(state, action, maxQval, reward)
+        print "Q learning: state = {}, action = {}, maxQval = {}, reward = {}, timestep = {}, totalReward = {} \n".format(state, action, maxQval, reward, t, totalReward)
         #print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
 
 
@@ -134,10 +140,10 @@ def run():
     # Set up environment and agent
     e = Environment()  # create environment (also adds some dummy traffic)
     a = e.create_agent(LearningAgent)  # create agent
-    e.set_primary_agent(a, enforce_deadline=True)  # set agent to track
+    e.set_primary_agent(a, enforce_deadline=False)  # set agent to track
 
     # Now simulate it
-    sim = Simulator(e, update_delay=1.0)  # reduce update_delay to speed up simulation
+    sim = Simulator(e, update_delay=0.1)  # reduce update_delay to speed up simulation
     sim.run(n_trials=10)  # press Esc or close pygame window to quit
 
 
