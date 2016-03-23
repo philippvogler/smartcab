@@ -25,24 +25,24 @@ class LearningAgent(Agent):
         #decision_table = {}
 
         # creating the key tupels for the Q-table
-        states_for_actions = [None, 'forward', 'left', 'right']
+        # recomendation_nwp, light, oncoming, right, action)
         states_for_recomendation_nwp = ['forward', 'left', 'right']
-        states_for_light = ['green', 'red']
+        states_for_light = ['green', 'red']        
+        states_for_actions = [None, 'forward', 'left', 'right']
         
-        # Q-table keys: 3 recomendation_nwp * 2 light * 4 oncoming * 4 left * 4 right * 4 action = 1536 states
+        # Q-table keys: 3 recomendation_nwp * 2 light * 4 oncoming  * 4 right * 4 action = 384 states
         Q_keys = []
         
         for action in states_for_actions:
             for right in states_for_actions:
-                for left in states_for_actions:
-                    for oncoming in states_for_actions:
-                        for light in states_for_light:
-                            for recomendation_nwp in states_for_recomendation_nwp:
-                                Q_keys.append((recomendation_nwp,light,oncoming,left,right,action))
+                for oncoming in states_for_actions:
+                    for light in states_for_light:
+                        for recomendation_nwp in states_for_recomendation_nwp:
+                            Q_keys.append((recomendation_nwp,light,oncoming,right,action))
  
         # Q-table initial values    
         # Q_initial_values = [random.random() for _ in range(0, len(Q_keys))] 
-        Q_initial_values = [int(random.random()*5) for _ in range(0, len(Q_keys))] 
+        Q_initial_values = [int(random.random() * 10) for _ in range(0, len(Q_keys))] 
         # QUESTION: can I incentivese exploration in the beginning by setting very hight inital values?
         # http://stackoverflow.com/questions/16655089/python-random-numbers-into-a-list
         # http://stackoverflow.com/questions/6863309/how-to-create-a-range-of-random-decimal-numbers-between-0-and-1
@@ -56,9 +56,9 @@ class LearningAgent(Agent):
         
         #Performance mesurement
         global totalReward        
-        totalReward = 0
+        totalReward = 0.0
 
-    def rest(self, destination=None):
+    def reset(self, destination=None):
         self.planner.route_to(destination)
         # TODO: Prepare for a new trip; reset any variables here, if required
         
@@ -80,8 +80,8 @@ class LearningAgent(Agent):
 
         # TODO: Update state
 
-        state = ((self.next_waypoint,) + tuple(inputs.values()))
-        #         (recomendation_nwp)  + (light,oncoming,left,right)
+        state = ((self.next_waypoint,) + tuple(inputs.values()[0:3])) # without the left input
+        #         (recomendation_nwp)  + (light,oncoming,right)
         # http://stackoverflow.com/questions/16449184/python-converting-string-to-tuple-without-splitting-characters        
         # http://stackoverflow.com/questions/7002429/how-can-i-extract-all-values-from-a-dictionary-in-python
         # http://stackoverflow.com/questions/12836128/python-convert-list-to-tuple        
@@ -132,7 +132,6 @@ class LearningAgent(Agent):
        
         print "Q learning: state = {}, action = {}, maxQval = {}, reward = {}, timestep = {}, totalReward = {} \n".format(state, action, maxQval, reward, t, totalReward)
         #print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
-
 
 def run():
     """Run the agent for a finite number of trials."""
