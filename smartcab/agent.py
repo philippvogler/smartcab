@@ -22,8 +22,8 @@ class LearningAgent(Agent):
         #recomendation_nwp = None
         #state = None
         #action = None
-        #decision_table = {} 
-        #----
+        #decision_table = {}
+
         # creating the key tupels for the Q-table
         states_for_actions = [None, 'forward', 'left', 'right']
         states_for_light = ['green', 'red']
@@ -42,22 +42,16 @@ class LearningAgent(Agent):
         # Q-table initial values    
         Q_initial_values = [random.random() for _ in range(0, len(Q_keys))] 
         # Q_initial_values = [int(random.random()*10) for _ in range(0, len(Q_keys))] 
-        # FRAGE: Oder macht hier doch float mehr Sinn, um zu vermeiden das es zwei genau gleich große Zhalen gibt???
+        # QUESTION: can I incentivese exploration in the beginning by setting very hight inital values?
         # http://stackoverflow.com/questions/16655089/python-random-numbers-into-a-list
         # http://stackoverflow.com/questions/6863309/how-to-create-a-range-of-random-decimal-numbers-between-0-and-1
         # http://stackoverflow.com/questions/1712227/how-to-get-the-size-of-a-list
-        # can I incentivese exploration in the beginning by setting very hight inital values?
+
         
         # Assambling the Q-table dictionary
         global Q_table
         Q_table = dict(zip(Q_keys,Q_initial_values))
         #http://stackoverflow.com/questions/209840/map-two-lists-into-a-dictionary-in-python
-
-        # STEP2: Varible for exploration alpha that leads to random action picking
-        # alpha = 1
-        
-        # STEP4: Init Learningrate gamma
-        # gamma = 0.2 # learning rate
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
@@ -87,26 +81,32 @@ class LearningAgent(Agent):
         # http://stackoverflow.com/questions/7002429/how-can-i-extract-all-values-from-a-dictionary-in-python
         # http://stackoverflow.com/questions/12836128/python-convert-list-to-tuple        
 
-        # ADDITIONAL: Create a decreasing alpha for exploration
-        # if deadline != None
-        #   alpha = 1- 1/deadline
-
         # TODO: Select action according to your policy
-
+        
         # fetching the Q-values for the possible actions into a decision table     
         decision_table = {None: Q_table[(state + (None,))], 'right': Q_table[(state + ('right',))], 'left': Q_table[(state + ('left',))], 'forward': Q_table[(state + ('forward',))]}        
 
-        # pick the action/Q-value pair with the highest Q-value
-        maxQval, action = max((v, k) for k, v in decision_table.iteritems())       
-        # http://stackoverflow.com/questions/9693816/searching-dictionary-for-max-value-then-grabbing-associated-key
+        # Exploitation rate gamma
+        gamma = (1 / (deadline + 1)) + 0.1
+
+        if  random.random() < gamma:
+            # pick the action/Q-value pair with the highest Q-value to Exploit the Q table
+            maxQval, action = max((v, k) for k, v in decision_table.iteritems())       
+            # http://stackoverflow.com/questions/9693816/searching-dictionary-for-max-value-then-grabbing-associated-key
         
+        else:
+            # pick a random action to explore
+            action =  random.choice([None, 'forward', 'left', 'right'])
+            # get the (not neccessarily really max) maxQval form the decision table
+            maxQval = decision_table [action]
+            
         # Simple Agent: 
         # action = self.next_waypoint 
         
-        # Random Agent: action =  
-        # random.choice([None, 'forward', 'left', 'right'])
+        # Random Agent: 
+        # action =  random.choice([None, 'forward', 'left', 'right'])
         
-        # ADDITION: add a if statement that pics a random action from the Q-tablle with alpha percent chance
+
         # ADDITION: tune the action picking depending on the deadline: exploration/exploitation
 
         # Execute action and get reward
@@ -114,14 +114,17 @@ class LearningAgent(Agent):
         #valid_actions = [None, 'forward', 'left', 'right']
 
         # TODO: Learn policy based on state, action, reward
-               
+           
+        # decreasing learning rate alpha
+        alpha = 1/((t/10)+1)
+
         # update the Q-tablle according to the reward and the stats maxQval
-        Q_table[(state + (action,))] = (maxQval + reward)
+        Q_table[(state + (action,))] = (maxQval + (alpha * reward))
         # http://www.tutorialspoint.com/python/python_dictionary.htm
 
-        # ADDITIONAL: Include a learningrate gamma
-        
-        print "Q learning: state = {}, action = {}, maxQval = {}, reward = {}".format(state, action, maxQval, reward)
+        # ADDITION: add a if statement that pics a random action from the Q-tablle with gamma percent chance
+       
+        print "Q learning: state = {}, action = {}, maxQval = {}, reward = {} \n".format(state, action, maxQval, reward)
         #print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
 
 
@@ -131,7 +134,7 @@ def run():
     # Set up environment and agent
     e = Environment()  # create environment (also adds some dummy traffic)
     a = e.create_agent(LearningAgent)  # create agent
-    e.set_primary_agent(a, enforce_deadline=False)  # set agent to track
+    e.set_primary_agent(a, enforce_deadline=True)  # set agent to track
 
     # Now simulate it
     sim = Simulator(e, update_delay=1.0)  # reduce update_delay to speed up simulation

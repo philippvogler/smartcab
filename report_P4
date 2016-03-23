@@ -17,11 +17,21 @@ The line action = random.choice([None, 'forward', 'left', 'right'])` makes the d
 
  ** What changes do you notice in the agent’s behavior? **
 
+ * pat
+ * right loops
+ * long learning periods
+
 ## 4. Enhance the driving agent
 
 ** Report what changes you made to your basic implementation of Q-Learning to achieve the final version of the agent. How well does it perform? **
 
-
+* reduce the count of states/keys in the q table
+* introduce a learning rate
+* introduce a gamma to solve the exploration exploitation dilemma
+* use the deadline for this
+* set the initial values of the q table in regard of the rewards.
 
 
 ** Does your agent get close to finding an optimal policy, i.e. reach the destination in the minimum possible time, and not incur any penalties? **
+
+* the primary goal is to follow the next_waypoint recommendations without violating any traffic rules
