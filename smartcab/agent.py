@@ -32,7 +32,7 @@ class LearningAgent(Agent):
                             Q_keys.append((recomendation_nwp,light,oncoming,right,action))
 
         # Q-table initial values    
-        Q_initial_values = [random.random() for _ in range(0, len(Q_keys))] 
+        Q_initial_values = [random.random()*2 for _ in range(0, len(Q_keys))] 
  
         # http://stackoverflow.com/questions/16655089/python-random-numbers-into-a-list
         # http://stackoverflow.com/questions/6863309/how-to-create-a-range-of-random-decimal-numbers-between-0-and-1
