@@ -3,7 +3,7 @@ from environment import Agent, Environment
 from planner import RoutePlanner
 from simulator import Simulator
 from math import log
-from pprint import pprint
+#from pprint import pprint #[debug]]
 
 class LearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
@@ -15,13 +15,11 @@ class LearningAgent(Agent):
         super(LearningAgent, self).__init__(env)  # sets self.env = env, state = None, next_waypoint = None, and a default color
         self.color = 'red'  # override color
         self.planner = RoutePlanner(self.env, self)  # simple route planner to get next_waypoint
+        
         # TODO: Initialize any additional variables here
-
-
         states_for_recomendation_nwp = ['forward', 'left', 'right']
         states_for_light = ['green', 'red']        
-        states_for_actions = [None, 'forward', 'left', 'right']
-        
+        states_for_actions = [None, 'forward', 'left', 'right']       
       
         # Q-table keys: 3 recomendation_nwp * 2 light * 4 oncoming  * 4 right * 4 action = 384 states
         Q_keys = []
@@ -34,7 +32,7 @@ class LearningAgent(Agent):
                             Q_keys.append((recomendation_nwp,light,oncoming,right,action))
 
         # Q-table initial values    
-        Q_initial_values = [random.random()*10 for _ in range(0, len(Q_keys))] 
+        Q_initial_values = [random.random() for _ in range(0, len(Q_keys))] 
  
         # http://stackoverflow.com/questions/16655089/python-random-numbers-into-a-list
         # http://stackoverflow.com/questions/6863309/how-to-create-a-range-of-random-decimal-numbers-between-0-and-1
@@ -44,10 +42,6 @@ class LearningAgent(Agent):
         global Q_table
         Q_table = dict(zip(Q_keys,Q_initial_values))
         #http://stackoverflow.com/questions/209840/map-two-lists-into-a-dictionary-in-python
-        
-        #Performance mesurement
-        global totalReward        
-        totalReward = 0.0
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
@@ -60,35 +54,27 @@ class LearningAgent(Agent):
         deadline = self.env.get_deadline(self)
 
         # TODO: Update state
-
         state = ((self.next_waypoint,) + (inputs['light'], inputs['oncoming'], inputs['right']))
+        #pprint (state) [debug]
             
         # http://stackoverflow.com/questions/16449184/python-converting-string-to-tuple-without-splitting-characters        
         # http://stackoverflow.com/questions/7002429/how-can-i-extract-all-values-from-a-dictionary-in-python
         # http://stackoverflow.com/questions/12836128/python-convert-list-to-tuple        
 
-        # TODO: Select action according to your policy
-        
+        # TODO: Select action according to your policy        
         # fetching the Q-values for the possible actions into a decision table
         decision_table = {None: Q_table[(state + (None,))], 'right': Q_table[(state + ('right',))], 'left': Q_table[(state + ('left',))], 'forward': Q_table[(state + ('forward',))]}        
-        #decision_table = {None: Q_table[(state + (None,))], 'right': Q_table[(state + ('right',))], 'left': Q_table[(state + ('left',))], 'forward': Q_table[(state + ('forward',))]}        
 
-        # Exploitation rate gamma
-        # gamma = (1 / (deadline + 0.00001)) + 0.5
-        # gamma = (log(deadline+0.0001))*0.333 
-        gamma = 1
+        # Exploraition rate gamma
+        gamma = (log(deadline+0.0001))*0.033
         
         if  random.random() > gamma:
-            # pick the action/Q-value pair with the highest Q-value to Exploit the Q table
-            #maxQval, action = max((v, k) for k, v in decision_table.iteritems())
             maxQval, action = decision_table [(self.next_waypoint)], (self.next_waypoint)
             # http://stackoverflow.com/questions/9693816/searching-dictionary-for-max-value-then-grabbing-associated-key
         
         else:
-            # pick a random action to explore
-            action =  random.choice([None, 'forward', 'left', 'right'])
-            # get the (not neccessarily really max) maxQval form the decision table
-            maxQval = decision_table [action]
+            # pick the action/Q-value pair with the highest Q-value to Exploit the Q table
+            maxQval, action = max((v, k) for k, v in decision_table.iteritems())
 
         #----
         # Simple Agent: 
@@ -104,14 +90,13 @@ class LearningAgent(Agent):
         # TODO: Learn policy based on state, action, reward
            
         # decreasing learning rate alpha
-        #alpha = 1/((t/100)+1)
-        alpha = 0.5               
+        alpha = (1 / (t+1)) + 0.2
 
         # update the Q-tablle according to the reward and the stats maxQval
         Q_table[(state + (action,))] = (maxQval + (alpha * reward))
         # http://www.tutorialspoint.com/python/python_dictionary.htm    
        
-        #print "Q learning: state = {}, action = {}, maxQval = {}, reward = {}, timestep = {}\n".format(state, action, maxQval, reward, t)
+        #print "Q learning: state = {}, action = {}, maxQval = {}, reward = {}, timestep = {}\n".format(state, action, maxQval, reward, t)  # [debug]
         #print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
 
 def run():
@@ -123,7 +108,7 @@ def run():
     e.set_primary_agent(a, enforce_deadline=True)  # set agent to track
 
     # Now simulate it
-    sim = Simulator(e, update_delay=0.0001)  # reduce update_delay to speed up simulation
+    sim = Simulator(e, update_delay=0.01)  # reduce update_delay to speed up simulation
     sim.run(n_trials=10)  # press Esc or close pygame window to quit
 
 
