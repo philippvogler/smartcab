@@ -38,7 +38,7 @@ class LearningAgent(Agent):
         # http://stackoverflow.com/questions/6863309/how-to-create-a-range-of-random-decimal-numbers-between-0-and-1
         # http://stackoverflow.com/questions/1712227/how-to-get-the-size-of-a-list
         
-        # Assambling the Q-table dictionary
+        # Assembling the Q-table dictionary
         global Q_table
         Q_table = dict(zip(Q_keys,Q_initial_values))
         #http://stackoverflow.com/questions/209840/map-two-lists-into-a-dictionary-in-python
@@ -62,10 +62,10 @@ class LearningAgent(Agent):
         # http://stackoverflow.com/questions/12836128/python-convert-list-to-tuple        
 
         # TODO: Select action according to your policy        
-        # fetching the Q-values for the possible actions into a decision table
+        # Fetching the Q-values for the possible actions into a decision table
         decision_table = {None: Q_table[(state + (None,))], 'right': Q_table[(state + ('right',))], 'left': Q_table[(state + ('left',))], 'forward': Q_table[(state + ('forward',))]}        
 
-        # Exploraition rate gamma
+        # Exploration rate gamma
         gamma = (log(deadline+0.0001))*0.033
         
         if  random.random() > gamma:
@@ -89,10 +89,10 @@ class LearningAgent(Agent):
 
         # TODO: Learn policy based on state, action, reward
            
-        # decreasing learning rate alpha
+        # Decreasing learning rate alpha
         alpha = (1 / (t+1)) + 0.2
 
-        # update the Q-tablle according to the reward and the stats maxQval
+        # Update the Q-table according to the reward and the stats maxQval
         Q_table[(state + (action,))] = (maxQval + (alpha * reward))
         # http://www.tutorialspoint.com/python/python_dictionary.htm    
        
