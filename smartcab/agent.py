@@ -91,10 +91,28 @@ class LearningAgent(Agent):
            
         # Decreasing learning rate alpha
         alpha = (1 / (t+1)) + 0.2
+        
+        # Discount rate gamma
+        gamma = 0.25
 
-        # Update the Q-table according to the reward and the stats maxQval
-        Q_table[(state + (action,))] = (maxQval + (alpha * reward))
-        # http://www.tutorialspoint.com/python/python_dictionary.htm    
+        # Update the Q-table according to the (future)reward(s)
+        futureRewards = max((v, k) for k, v in decision_table.iteritems())
+        newQval = reward + gamma * futureRewards
+        Q_table[(state + (action,))] = Q_table[(state + (action,))] + alpha * (newQval - Q_table[(state + (action,))])
+        # http://www.tutorialspoint.com/python/python_dictionary.htm
+        
+        '''----
+        \\IE mix new and old information based on learning rate 
+        Qval(State,action) = currentQval(State,action) - alpha*(newQval - currenQval(State,action)) 
+        \\The value of an action is always reward plus the discounted (gamma) future rewards.
+        newQval = reward + gamma*furtureRewards
+        future rewards are simply the qval of the best action of the next state. IE how much reward do I get from the next state if I take the best action. 
+        furtureRewards = max(Qval(nextState))
+         After the action is applied, you can use sense from env to get the next state.
+
+        reward = self.env.act(self, action)
+        nextstate = buildstate(self.env.sense(self)) //the build state function is how you build your state from the env inputs.
+        ---'''
        
         #print "Q learning: state = {}, action = {}, maxQval = {}, reward = {}, timestep = {}\n".format(state, action, maxQval, reward, t)  # [debug]
         #print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
