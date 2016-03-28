@@ -66,15 +66,15 @@ class LearningAgent(Agent):
         decision_table = {None: Q_table[(state + (None,))], 'right': Q_table[(state + ('right',))], 'left': Q_table[(state + ('left',))], 'forward': Q_table[(state + ('forward',))]}        
 
         # Exploration rate gamma
-        gamma = (log(deadline+0.0001))*0.033
+        epsilon = (log(deadline+0.0001))*0.033
         
-        if  random.random() > gamma:
-            maxQval, action = decision_table [(self.next_waypoint)], (self.next_waypoint)
-            # http://stackoverflow.com/questions/9693816/searching-dictionary-for-max-value-then-grabbing-associated-key
-        
+        if  epsilon < random.random():
+             # pick the action/Q-value pair with the highest Q-value to Exploit the Q table
+            currentQval, action = max((v, k) for k, v in decision_table.iteritems())            
+            
         else:
-            # pick the action/Q-value pair with the highest Q-value to Exploit the Q table
-            maxQval, action = max((v, k) for k, v in decision_table.iteritems())
+            currentQval, action = decision_table [(self.next_waypoint)], (self.next_waypoint)
+            # http://stackoverflow.com/questions/9693816/searching-dictionary-for-max-value-then-grabbing-associated-key        
 
         #----
         # Simple Agent: 
@@ -92,16 +92,15 @@ class LearningAgent(Agent):
         # Decreasing learning rate alpha
         alpha = (1 / (t+1)) + 0.2
         
-        # Discount rate gamma
+        # Discount gamma
         gamma = 0.25
 
         # Update the Q-table according to the (future)reward(s)
         futureRewards = max((v, k) for k, v in decision_table.iteritems())
         newQval = reward + gamma * futureRewards
-        Q_table[(state + (action,))] = Q_table[(state + (action,))] + alpha * (newQval - Q_table[(state + (action,))])
-        # http://www.tutorialspoint.com/python/python_dictionary.htm
+        Q_table[(state + (action,))] = currentQval + alpha * (newQval - currentQval)
         
-        '''----
+        '''
         \\IE mix new and old information based on learning rate 
         Qval(State,action) = currentQval(State,action) - alpha*(newQval - currenQval(State,action)) 
         \\The value of an action is always reward plus the discounted (gamma) future rewards.
@@ -112,7 +111,7 @@ class LearningAgent(Agent):
 
         reward = self.env.act(self, action)
         nextstate = buildstate(self.env.sense(self)) //the build state function is how you build your state from the env inputs.
-        ---'''
+        '''
        
         #print "Q learning: state = {}, action = {}, maxQval = {}, reward = {}, timestep = {}\n".format(state, action, maxQval, reward, t)  # [debug]
         #print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
