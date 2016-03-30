@@ -5,7 +5,7 @@ from simulator import Simulator
 from math import log
 import matplotlib.pyplot as plt
 import numpy as np
-from pprint import pprint #[debug]]
+#from pprint import pprint #[debug]]
 
 class LearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
@@ -58,10 +58,12 @@ class LearningAgent(Agent):
     def reset(self, destination=None):
         self.planner.route_to(destination)
         # TODO: Prepare for a new trip; reset any variables here, if required
-
-        # Performance tracking   
-        print "Average reward per action in this run: {} ".format(total_reward/number_of_actions)
-        print "Average total reward over all: {} \n".format(np.mean(total_reward_list))
+        
+        # Performance tracking
+        global total_reward
+        total_reward_list.append(total_reward/number_of_actions)
+        average_reward_list.append (np.mean(total_reward_list))
+        
         plt.figure(1)
        
         plt.subplot(211)        
@@ -76,12 +78,11 @@ class LearningAgent(Agent):
         
         plt.xlabel('# trail')
         plt.ylabel('average reward')
-        #plt.annotate(str(np.mean(total_reward_list)), xy=(len(total_reward_list), np.mean(total_reward_list)))
         
-        # restet reward counting for the next run
-        global total_reward
-        total_reward_list.append(total_reward/number_of_actions)
-        average_reward_list.append (np.mean(total_reward_list))
+        #print "Average reward per action in this run: {} ".format(total_reward/number_of_actions)
+        #print "Average total reward over all: {} \n".format(np.mean(total_reward_list))        
+        
+        # Restet reward counting for the next run
         total_reward = 0.0
 
         global number_of_actions        
@@ -95,7 +96,6 @@ class LearningAgent(Agent):
 
         # TODO: Update state
         state = ((self.next_waypoint,) + (inputs['light'], inputs['oncoming'], inputs['right']))
-        #pprint (state) [debug]
 
         # http://stackoverflow.com/questions/16449184/python-converting-string-to-tuple-without-splitting-characters
         # http://stackoverflow.com/questions/7002429/how-can-i-extract-all-values-from-a-dictionary-in-python
@@ -107,7 +107,6 @@ class LearningAgent(Agent):
 
         # Exploration rate gamma
         epsilon = (log(deadline+0.0001)) * 0.0155
-        #epsilon = 0.045
 
         if  epsilon < random.random():
             # picking the action/Q-value pair with the highest Q-value to exploit the Q table
@@ -118,7 +117,6 @@ class LearningAgent(Agent):
             action =  random.choice([None, 'forward', 'left', 'right'])
             curr_qval = decision_table [(action)]
 
-        #else:curr_qval, action = decision_table [(self.next_waypoint)], (self.next_waypoint)
         #http://stackoverflow.com/questions/9693816/searching-dictionary-for-max-value-then-grabbing-associated-key
 
         #----
@@ -127,6 +125,9 @@ class LearningAgent(Agent):
 
         # Random Agent:
         # action =  random.choice([None, 'forward', 'left', 'right'])
+
+        #NWP Agent:
+        #else:curr_qval, action = decision_table [(self.next_waypoint)], (self.next_waypoint)
         #----
 
         # Execute action and get reward
@@ -136,7 +137,6 @@ class LearningAgent(Agent):
 
         # Set learning rate alpha
         alpha = (1.0 / (t+5)) + 0.75
-        #alpha = 0.85
         
         # Set discount gamma
         gamma = 0.4
@@ -160,6 +160,7 @@ class LearningAgent(Agent):
         # Performance tracking
         global number_of_actions        
         number_of_actions = number_of_actions + 1
+        
         global total_reward   
         total_reward = total_reward + reward
 
