@@ -4,8 +4,7 @@ from planner import RoutePlanner
 from simulator import Simulator
 from math import log
 import matplotlib.pyplot as plt
-import numpy as np
-#from pprint import pprint #[debug]]
+from numpy import mean
 
 class LearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
@@ -61,9 +60,11 @@ class LearningAgent(Agent):
         
         # Performance tracking
         global total_reward
+        global number_of_actions  
         total_reward_list.append(total_reward/number_of_actions)
-        average_reward_list.append (np.mean(total_reward_list))
+        average_reward_list.append (mean(total_reward_list))
         
+        # Performance chart
         plt.figure(1)
        
         plt.subplot(211)        
@@ -85,7 +86,7 @@ class LearningAgent(Agent):
         # Restet reward counting for the next run
         total_reward = 0.0
 
-        global number_of_actions        
+      
         number_of_actions = 1
 
     def update(self, t):
@@ -155,7 +156,7 @@ class LearningAgent(Agent):
         new_qval = reward + gamma * future_reward
 
         # Update the Q-table
-        Q_table[(state + (action,))] = curr_qval + alpha * (new_qval - curr_qval )
+        Q_table[(state + (action,))] = curr_qval + alpha * (new_qval - curr_qval)
 
         # Performance tracking
         global number_of_actions        
@@ -175,7 +176,7 @@ def run():
     e.set_primary_agent(a, enforce_deadline=True)  # set agent to track
 
     # Now simulate it
-    sim = Simulator(e, update_delay=1)  # reduce update_delay to speed up simulation
+    sim = Simulator(e, update_delay=0.01)  # reduce update_delay to speed up simulation
     sim.run(n_trials=10)  # press Esc or close pygame window to quit
     
     plt.show()
