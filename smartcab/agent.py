@@ -30,7 +30,7 @@ class LearningAgent(Agent):
                             Q_keys.append((recomendation_nwp,light,oncoming,right,action))
 
         # Q-table initial values
-        Q_initial_values = [random.random()*10 for _ in range(0, len(Q_keys))]
+        Q_initial_values = [random.random()*12 for _ in range(0, len(Q_keys))]
 
         # http://stackoverflow.com/questions/16655089/python-random-numbers-into-a-list
         # http://stackoverflow.com/questions/6863309/how-to-create-a-range-of-random-decimal-numbers-between-0-and-1
@@ -123,12 +123,11 @@ class LearningAgent(Agent):
         #----
         # Simple Agent:
         # action = self.next_waypoint
+        # curr_qval, action = decision_table [(self.next_waypoint)], (self.next_waypoint)
 
         # Random Agent:
         # action =  random.choice([None, 'forward', 'left', 'right'])
 
-        #NWP Agent:
-        #else:curr_qval, action = decision_table [(self.next_waypoint)], (self.next_waypoint)
         #----
 
         # Execute action and get reward
@@ -177,7 +176,7 @@ def run():
 
     # Now simulate it
     sim = Simulator(e, update_delay=0.01)  # reduce update_delay to speed up simulation
-    sim.run(n_trials=10)  # press Esc or close pygame window to quit
+    sim.run(n_trials=100)  # press Esc or close pygame window to quit
     
     plt.show()
    
