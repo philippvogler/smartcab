@@ -3,13 +3,12 @@ from environment import Agent, Environment
 from planner import RoutePlanner
 from simulator import Simulator
 from math import log
-#from pprint import pprint #[debug]]
+import matplotlib.pyplot as plt
+import numpy as np
+from pprint import pprint #[debug]]
 
 class LearningAgent(Agent):
     """An agent that learns to drive in the smartcab world."""
-
-    # Global variable for the Q-Table
-    Q_table = {}
 
     def __init__(self, env):
         super(LearningAgent, self).__init__(env)  # sets self.env = env, state = None, next_waypoint = None, and a default color
@@ -32,7 +31,7 @@ class LearningAgent(Agent):
                             Q_keys.append((recomendation_nwp,light,oncoming,right,action))
 
         # Q-table initial values
-        Q_initial_values = [random.random()*2 for _ in range(0, len(Q_keys))]
+        Q_initial_values = [random.random()*10 for _ in range(0, len(Q_keys))]
 
         # http://stackoverflow.com/questions/16655089/python-random-numbers-into-a-list
         # http://stackoverflow.com/questions/6863309/how-to-create-a-range-of-random-decimal-numbers-between-0-and-1
@@ -43,9 +42,50 @@ class LearningAgent(Agent):
         Q_table = dict(zip(Q_keys,Q_initial_values))
         #http://stackoverflow.com/questions/209840/map-two-lists-into-a-dictionary-in-python
 
+        #reward list for performance tracking       
+        global total_reward        
+        total_reward = 0.0
+        
+        global number_of_actions        
+        number_of_actions = 1
+        
+        global total_reward_list
+        total_reward_list = []
+        
+        global average_reward_list
+        average_reward_list = []
+
     def reset(self, destination=None):
         self.planner.route_to(destination)
         # TODO: Prepare for a new trip; reset any variables here, if required
+
+        # Performance tracking   
+        print "Average reward per action in this run: {} ".format(total_reward/number_of_actions)
+        print "Average total reward over all: {} \n".format(np.mean(total_reward_list))
+        plt.figure(1)
+       
+        plt.subplot(211)        
+        plt.plot(total_reward_list)
+ 
+        plt.title('Performance of learning agent')
+        plt.xlabel('# trail')
+        plt.ylabel('reward / step')
+        
+        plt.subplot(212)
+        plt.plot(average_reward_list)     
+        
+        plt.xlabel('# trail')
+        plt.ylabel('average reward')
+        #plt.annotate(str(np.mean(total_reward_list)), xy=(len(total_reward_list), np.mean(total_reward_list)))
+        
+        # restet reward counting for the next run
+        global total_reward
+        total_reward_list.append(total_reward/number_of_actions)
+        average_reward_list.append (np.mean(total_reward_list))
+        total_reward = 0.0
+
+        global number_of_actions        
+        number_of_actions = 1
 
     def update(self, t):
         # Gather inputs
@@ -66,19 +106,20 @@ class LearningAgent(Agent):
         decision_table = {None: Q_table[(state + (None,))], 'right': Q_table[(state + ('right',))], 'left': Q_table[(state + ('left',))], 'forward': Q_table[(state + ('forward',))]}
 
         # Exploration rate gamma
-        epsilon = (log(deadline+0.0001))*0.033
+        epsilon = (log(deadline+0.0001)) * 0.0155
+        #epsilon = 0.045
 
         if  epsilon < random.random():
-            # pick the action/Q-value pair with the highest Q-value to Exploit the Q table
+            # picking the action/Q-value pair with the highest Q-value to exploit the Q table
             curr_qval, action = max((v, k) for k, v in decision_table.iteritems())
-            
-            #max_qval, action = decision_table [(self.next_waypoint)], (self.next_waypoint)
-            # http://stackoverflow.com/questions/9693816/searching-dictionary-for-max-value-then-grabbing-associated-key
+
         else:
+            # picking a random action/Q-value pair with the highest Q-value to explore the Q table
             action =  random.choice([None, 'forward', 'left', 'right'])
             curr_qval = decision_table [(action)]
-            # pick the action/Q-value pair with the highest Q-value to Exploit the Q table
-            #max_qval, action = max((v, k) for k, v in decision_table.iteritems())
+
+        #else:curr_qval, action = decision_table [(self.next_waypoint)], (self.next_waypoint)
+        #http://stackoverflow.com/questions/9693816/searching-dictionary-for-max-value-then-grabbing-associated-key
 
         #----
         # Simple Agent:
@@ -93,11 +134,12 @@ class LearningAgent(Agent):
 
         # TODO: Learn policy based on state, action, reward
 
-        # Decreasing learning rate alpha
-        alpha = (1 / (t+1)) + 0.2
-
+        # Set learning rate alpha
+        alpha = (1.0 / (t+5)) + 0.75
+        #alpha = 0.85
+        
         # Set discount gamma
-        gamma = 0.25
+        gamma = 0.4
 
         # Build new state
         newinputs = self.env.sense(self)
@@ -112,23 +154,15 @@ class LearningAgent(Agent):
         # Calculate new Q-value
         new_qval = reward + gamma * future_reward
 
-        # Update the Q-table 
+        # Update the Q-table
         Q_table[(state + (action,))] = curr_qval + alpha * (new_qval - curr_qval )
 
-        '''
-        \\IE mix new and old information based on learning rate
-        Qval(State,action) = currentQval(State,action) - alpha*(newQval - currenQval(State,action))
-        \\The value of an action is always reward plus the discounted (gamma) future rewards.
-        newQval = reward + gamma*furtureRewards
-        future rewards are simply the qval of the best action of the next state. IE how much reward do I get from the next state if I take the best action.
-        furtureRewards = max(Qval(nextState))
-         After the action is applied, you can use sense from env to get the next state.
+        # Performance tracking
+        global number_of_actions        
+        number_of_actions = number_of_actions + 1
+        global total_reward   
+        total_reward = total_reward + reward
 
-        reward = self.env.act(self, action)
-        nextstate = buildstate(self.env.sense(self)) //the build state function is how you build your state from the env inputs.
-        '''
-
-        #print "Q learning: state = {}, action = {}, maxQval = {}, reward = {}, timestep = {}\n".format(state, action, maxQval, reward, t)  # [debug]
         #print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
 
 def run():
@@ -140,9 +174,11 @@ def run():
     e.set_primary_agent(a, enforce_deadline=True)  # set agent to track
 
     # Now simulate it
-    sim = Simulator(e, update_delay=0.0001)  # reduce update_delay to speed up simulation
-    sim.run(n_trials=100)  # press Esc or close pygame window to quit
-
+    sim = Simulator(e, update_delay=1)  # reduce update_delay to speed up simulation
+    sim.run(n_trials=10)  # press Esc or close pygame window to quit
+    
+    plt.show()
+   
 
 if __name__ == '__main__':
     run()
