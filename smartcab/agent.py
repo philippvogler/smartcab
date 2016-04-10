@@ -77,7 +77,7 @@ class LearningAgent(Agent):
         plt.subplot(212)
         plt.plot(average_reward_list)     
         
-        plt.xlabel('# trail')
+        plt.xlabel('# trails')
         plt.ylabel('average reward')
         
         #print "Average reward per action in this run: {} ".format(total_reward/number_of_actions)
@@ -98,7 +98,7 @@ class LearningAgent(Agent):
         # TODO: Update state
         state = ((self.next_waypoint,) + (inputs['light'], inputs['oncoming'], inputs['right']))
         
-        self.state = self.next_waypoint
+        self.state = "NWP: {} / LIGHTS: {} / ONCOMING: {} / ROW: {}".format(state[0],state[1],state[2],state[3])
 
         # http://stackoverflow.com/questions/16449184/python-converting-string-to-tuple-without-splitting-characters
         # http://stackoverflow.com/questions/7002429/how-can-i-extract-all-values-from-a-dictionary-in-python
@@ -178,7 +178,7 @@ def run():
 
     # Now simulate it
     sim = Simulator(e, update_delay=0.01)  # reduce update_delay to speed up simulation
-    sim.run(n_trials=100)  # press Esc or close pygame window to quit
+    sim.run(n_trials=10)  # press Esc or close pygame window to quit
     
     plt.show()
    
