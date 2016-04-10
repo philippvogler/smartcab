@@ -97,6 +97,8 @@ class LearningAgent(Agent):
 
         # TODO: Update state
         state = ((self.next_waypoint,) + (inputs['light'], inputs['oncoming'], inputs['right']))
+        
+        self.state = self.next_waypoint
 
         # http://stackoverflow.com/questions/16449184/python-converting-string-to-tuple-without-splitting-characters
         # http://stackoverflow.com/questions/7002429/how-can-i-extract-all-values-from-a-dictionary-in-python
