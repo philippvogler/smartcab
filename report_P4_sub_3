@@ -55,8 +55,11 @@ Later I also scraped the 'left' input from the state, because it is not relevant
 
 ** Does your agent get close to finding an optimal policy, i.e. reach the destination in the minimum possible time, and not incur any penalties? **
 
-With the exploration rate, there is a random element in the decision process that prohibits 100% optimal behavior. Furthermore, the agent is not preventing penalties at all costs.
-That said, the policy gets very good. The reward per action, as well as the average reward, improves significantly. In the order of 20 to 40 runs the average reward asymptotes at about two. The reward per action in a run fluctuates but with an upward trend.
+With the exploration rate, there is a random element in the decision process that prohibits 100% optimal behavior but helps to get it close to optimal.
+
+That said, the policy gets very good. The reward per action, as well as the average reward, improves significantly. In the order of 20 to 40 runs the average reward asymptotes at about two. The reward per action in a run fluctuates but with an upward trend. Running in clockwise cycles or staying put for no reason becomes less and less often.
 After about 50 runs the policy only improves marginally.
+
+To get an "optimal policy", the Q table must be explored extensively, and the exploration rate must drop to zero at that point.
 
 figure_1.png
