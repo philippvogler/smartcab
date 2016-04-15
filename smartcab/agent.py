@@ -19,18 +19,18 @@ class LearningAgent(Agent):
         states_for_light = ['green', 'red']
         states_for_actions = [None, 'forward', 'left', 'right']
 
-        # Q-table keys: 3 recomendation_nwp * 2 light * 4 oncoming  * 4 right * 4 action = 384 states
+        # Q-table keys: 3 recomendation_nwp * 2 light * 4 oncoming  * 4 left * 4 action = 384 states
         Q_keys = []
 
         for action in states_for_actions:
-            for right in states_for_actions:
+            for left in states_for_actions:
                 for oncoming in states_for_actions:
                     for light in states_for_light:
                         for recomendation_nwp in states_for_recomendation_nwp:
-                            Q_keys.append((recomendation_nwp,light,oncoming,right,action))
+                            Q_keys.append((recomendation_nwp,light,oncoming,left,action))
 
         # Q-table initial values
-        Q_initial_values = [random.random()*12 for _ in range(0, len(Q_keys))]
+        Q_initial_values = [random.random()*4 for _ in range(0, len(Q_keys))]
 
         # http://stackoverflow.com/questions/16655089/python-random-numbers-into-a-list
         # http://stackoverflow.com/questions/6863309/how-to-create-a-range-of-random-decimal-numbers-between-0-and-1
@@ -96,7 +96,7 @@ class LearningAgent(Agent):
         deadline = self.env.get_deadline(self)
 
         # TODO: Update state
-        state = ((self.next_waypoint,) + (inputs['light'], inputs['oncoming'], inputs['right']))
+        state = ((self.next_waypoint,) + (inputs['light'], inputs['oncoming'], inputs['left']))
         
         self.state = "NWP: {} / LIGHTS: {} / ONCOMING: {} / ROW: {}".format(state[0],state[1],state[2],state[3])
 
@@ -145,7 +145,7 @@ class LearningAgent(Agent):
 
         # Build new state
         newinputs = self.env.sense(self)
-        newstate = ((self.next_waypoint,) + (newinputs['light'], newinputs['oncoming'], newinputs['right']))
+        newstate = ((self.next_waypoint,) + (newinputs['light'], newinputs['oncoming'], newinputs['left']))
 
         # Future rewards from q table
         future_table = {None: Q_table[(newstate + (None,))], 'right': Q_table[(newstate + ('right',))], 'left': Q_table[(newstate + ('left',))], 'forward': Q_table[(newstate + ('forward',))]}
