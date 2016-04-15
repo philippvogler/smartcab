@@ -108,7 +108,7 @@ class LearningAgent(Agent):
         # Fetching the Q-values for the possible actions into a decision table
         decision_table = {None: Q_table[(state + (None,))], 'right': Q_table[(state + ('right',))], 'left': Q_table[(state + ('left',))], 'forward': Q_table[(state + ('forward',))]}
 
-        # Exploration rate gamma
+        # Exploration rate epsilon
         epsilon = (log(deadline+0.0001)) * 0.0155
 
         if  epsilon < random.random():
