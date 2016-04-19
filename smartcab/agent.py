@@ -30,7 +30,7 @@ class LearningAgent(Agent):
                             Q_keys.append((recomendation_nwp,light,oncoming,left,action))
 
         # Q-table initial values
-        Q_initial_values = [random.random()*4 for _ in range(0, len(Q_keys))]
+        Q_initial_values = [random.random() * 4 for _ in range(0, len(Q_keys))] #[0] * len(Q_keys)
 
         # http://stackoverflow.com/questions/16655089/python-random-numbers-into-a-list
         # http://stackoverflow.com/questions/6863309/how-to-create-a-range-of-random-decimal-numbers-between-0-and-1
@@ -177,8 +177,8 @@ def run():
     e.set_primary_agent(a, enforce_deadline=True)  # set agent to track
 
     # Now simulate it
-    sim = Simulator(e, update_delay=0.01)  # reduce update_delay to speed up simulation
-    sim.run(n_trials=100)  # press Esc or close pygame window to quit
+    sim = Simulator(e, update_delay=0.0001)  # reduce update_delay to speed up simulation
+    sim.run(n_trials=30)  # press Esc or close pygame window to quit
     
     plt.show()
    
