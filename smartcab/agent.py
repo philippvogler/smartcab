@@ -37,57 +37,45 @@ class LearningAgent(Agent):
         # http://stackoverflow.com/questions/1712227/how-to-get-the-size-of-a-list
 
         # Assembling the Q-table dictionary
-        global Q_table
-        Q_table = dict(zip(Q_keys,Q_initial_values))
+        self.Q_table = dict(zip(Q_keys,Q_initial_values))
         #http://stackoverflow.com/questions/209840/map-two-lists-into-a-dictionary-in-python
 
-        #reward list for performance tracking       
-        global total_reward        
-        total_reward = 0.0
-        
-        global number_of_actions        
-        number_of_actions = 1
-        
-        global total_reward_list
-        total_reward_list = []
-        
-        global average_reward_list
-        average_reward_list = []
+        #reward list for performance tracking         
+        self.total_reward = 0.0             
+        self.number_of_actions = 1
+        self.total_reward_list = []
+        self.average_reward_list = []
 
     def reset(self, destination=None):
         self.planner.route_to(destination)
         # TODO: Prepare for a new trip; reset any variables here, if required
         
         # Performance tracking
-        global total_reward
-        global number_of_actions  
-        total_reward_list.append(total_reward/number_of_actions)
-        average_reward_list.append (mean(total_reward_list))
+        self.total_reward_list.append(self.total_reward/self.number_of_actions)
+        self.average_reward_list.append (mean(self.total_reward_list))
         
         # Performance chart
         plt.figure(1)
        
         plt.subplot(211)        
-        plt.plot(total_reward_list)
+        plt.plot(self.total_reward_list)
  
         plt.title('Performance of learning agent')
         plt.xlabel('# trail')
         plt.ylabel('reward / step')
         
         plt.subplot(212)
-        plt.plot(average_reward_list)     
+        plt.plot(self.average_reward_list)     
         
         plt.xlabel('# trails')
         plt.ylabel('average reward')
         
-        #print "Average reward per action in this run: {} ".format(total_reward/number_of_actions)
+        #print "Average reward per action in this run: {} ".format(self.total_reward/number_of_actions)
         #print "Average total reward over all: {} \n".format(np.mean(total_reward_list))        
         
         # Restet reward counting for the next run
-        total_reward = 0.0
-
-      
-        number_of_actions = 1
+        self.total_reward = 0.0  
+        self.number_of_actions = 1
 
     def update(self, t):
         # Gather inputs
@@ -106,7 +94,7 @@ class LearningAgent(Agent):
 
         # TODO: Select action according to your policy
         # Fetching the Q-values for the possible actions into a decision table
-        decision_table = {None: Q_table[(state + (None,))], 'right': Q_table[(state + ('right',))], 'left': Q_table[(state + ('left',))], 'forward': Q_table[(state + ('forward',))]}
+        decision_table = {None: self.Q_table[(state + (None,))], 'right': self.Q_table[(state + ('right',))], 'left': self.Q_table[(state + ('left',))], 'forward': self.Q_table[(state + ('forward',))]}
 
         # Exploration rate epsilon
         epsilon = (log(deadline+0.0001)) * 0.0155
@@ -148,7 +136,7 @@ class LearningAgent(Agent):
         newstate = ((self.next_waypoint,) + (newinputs['light'], newinputs['oncoming'], newinputs['left']))
 
         # Future rewards from q table
-        future_table = {None: Q_table[(newstate + (None,))], 'right': Q_table[(newstate + ('right',))], 'left': Q_table[(newstate + ('left',))], 'forward': Q_table[(newstate + ('forward',))]}
+        future_table = {None: self.Q_table[(newstate + (None,))], 'right': self.Q_table[(newstate + ('right',))], 'left': self.Q_table[(newstate + ('left',))], 'forward': self.Q_table[(newstate + ('forward',))]}
 
         # Max future reward
         future_reward, future_action = max((v, k) for k, v in future_table.iteritems())
@@ -157,14 +145,11 @@ class LearningAgent(Agent):
         new_qval = reward + gamma * future_reward
 
         # Update the Q-table
-        Q_table[(state + (action,))] = curr_qval + alpha * (new_qval - curr_qval)
+        self.Q_table[(state + (action,))] = curr_qval + alpha * (new_qval - curr_qval)
 
-        # Performance tracking
-        global number_of_actions        
-        number_of_actions = number_of_actions + 1
-        
-        global total_reward   
-        total_reward = total_reward + reward
+        # Performance tracking      
+        self.number_of_actions = self.number_of_actions + 1   
+        self.total_reward = self.total_reward + reward
 
         #print "LearningAgent.update(): deadline = {}, inputs = {}, action = {}, reward = {}".format(deadline, inputs, action, reward)  # [debug]
 
